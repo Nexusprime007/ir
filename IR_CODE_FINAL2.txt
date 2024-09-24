@@ -1,0 +1,443 @@
+---------------------------# PRACTICAL 1 - BITWISE OPERATOR # ---------------
+
+a = int(input("Enter a number: "))
+b = int(input("Enter a number: "))
+
+print("Bitwise AND operation :a & b = ", a & b)
+print ("Bitwise OR operation : a | b = ", a | b)
+print("Bitwise NOT operation : ~a = ", ~a)
+print("Bitwise XOR operation : a ^ b = ", a ^ b)
+print("Bitwise left-shift 1:- " ,a<<b)
+print("Bitwise left-shift 2:- " ,b<<a)
+print("Bitwise right-shift 1:- " ,a>>b)
+print("Bitwise right-shift 2:- " ,b>>a)
+
+
+--------------------------# PRACTICAL 2 - PAGE RANK ALGO # ---------------------
+
+
+import numpy as np
+
+def page_rank(links,num_iterations=100,damping_factor=0.85):
+    num_pages=len(links)
+    matrix=np.zeros((num_pages,num_pages))
+
+    for i,link in enumerate(links):
+        if len(link)==0:
+            matrix[i]=np.ones(num_page)/num_pages
+
+        else:
+            for j in link:
+                matrix[j][i]=1/len(link)
+                scores=np.ones(num_pages)/num_pages
+    for i in range(num_iterations):
+        scores=(1-damping_factor)/num_pages+damping_factor*np.matmul(matrix,scores)
+        return scores
+
+num_pages=4
+links=[[1,2],[0,2],[2,3],[0,1]]
+
+page_scores=page_rank(links)
+for i,score in enumerate(page_scores):
+    print(f"Page {i+1}:{score}")
+
+
+
+
+---------------------------------# PRACTICAL 3 - EDIT DISTANCE # --------------------------
+
+
+
+def edit_dis(s1,s2):
+    m=len(s1)
+    n= len(s2)
+
+    dp = [[0]*(n+1) for _ in range(m+1)]
+
+    for i in range(m+1):
+        dp[i][0]=i
+    for j in range(n+1):
+        dp[0][j]=j
+
+    for i in range(1,m + 1):
+        for j in range(1,n+1):
+            if s1[i - 1]==s2[j-1]:
+                dp[i][j] =dp[i-1][j-1]
+            else:
+                dp[i][j]=1+min(dp[i-1][j],
+                               dp[i][j-1],
+                               dp[i-1][j-1])
+    return dp[m][n]
+s1=input("Enter the first string ")
+s2=input("Enter the Second String ")
+
+distance = edit_dis(s1,s2)
+
+print(f"The edit distance between '{s1}' and '{s2}' is {distance}.")
+
+
+
+-----------------------------------# PRACTICAL 4 -  COMPUTE SIMILARITY BETWEEN TWO DOCUMENTS # -------------------
+
+
+
+import math
+import string
+import sys
+
+def read_file(filename):
+    try:
+        with open(filename, 'r') as f:
+            data = f.read()
+        return data
+    except IOError:
+                
+        print("Error opening or reading input file: ", filename)
+        sys.exit()
+
+translation_table = str.maketrans(string.punctuation+string.ascii_uppercase," "*len(string.punctuation)+string.ascii_lowercase)
+                
+def get_words_from_line_list(text):
+    text = text.translate(translation_table)
+    word_list = text.split()
+    return word_list
+
+def count_frequency(word_list):
+    D = {}
+    for new_word in word_list:
+        if new_word in D:
+            D[new_word] = D[new_word] + 1
+        else:
+            D[new_word] = 1
+    return D
+
+def word_frequencies_for_file(filename):
+    line_list = read_file(filename)
+    word_list = get_words_from_line_list(line_list)
+    freq_mapping = count_frequency(word_list)
+    print("File", filename, ":", )
+    print(len(line_list), "lines, ", )
+    print(len(word_list), "words, ", )
+    print(len(freq_mapping), "distinct words")
+    return freq_mapping
+
+def dotProduct(D1, D2):
+    Sum = 0.0
+    for key in D1:
+        if key in D2:
+            Sum += (D1[key] * D2[key])
+    return Sum
+
+def vector_angle(D1, D2):
+    numerator = dotProduct(D1, D2)
+    denominator = math.sqrt(dotProduct(D1, D1)*dotProduct(D2, D2))
+    return math.acos(numerator / denominator)
+def documentSimilarity(filename_1, filename_2):
+
+    sorted_word_list_1 = word_frequencies_for_file(filename_1)
+    sorted_word_list_2 = word_frequencies_for_file(filename_2)
+    distance = vector_angle(sorted_word_list_1, sorted_word_list_2)
+    print("The distance between the documents is: % 0.6f (radians)"% distance)
+documentSimilarity('file1.txt', 'file2.txt')
+
+
+
+
+
+
+
+
+----------------------------# PRACTICAL 5 - Count the number of Occurrences # --------------------
+
+data ='Character Count Practical'
+def mapper(data):
+    char_counts = {}
+    for char in data:
+        if char.isalpha():
+            char = char.lower()
+            if char in char_counts:
+                char_counts[char] +=1
+            else:
+                char_counts[char] = 1
+    return char_counts
+def reducer(data):
+    char_counts={}
+    for count_dict in data:
+        for char,count in count_dict.items():
+            if char in char_counts:
+                char_counts[char] += count
+            else:
+                char_counts[char] = count
+    return char_counts
+mapped_data = [mapper(char) for char in data]
+reduced_data = reducer(mapped_data)
+print(reduced_data)
+
+
+
+------------------------------# PRACTICAL 6 - IR system using Lucene -------------------------
+
+
+
+--->Q1 STEP 1
+
+
+from whoosh.index import create_in
+from whoosh.fields import Schema, TEXT, ID
+
+schema = Schema(id=ID(stored=True), content=TEXT(stored=True))
+index_path = ""   #path directory with \\ 
+index = create_in(index_path, schema)
+writer = index.writer()
+
+writer.add_document(id="1", content="This is an example document.")
+writer.commit()
+
+
+----> Q2 STEP 2
+
+
+from whoosh.qparser import QueryParser
+from whoosh import scoring
+from whoosh.index import open_dir
+
+
+index_directory = " "  #path directory with \\
+
+index = open_dir(index_directory)
+
+searcher = index.searcher(weighting=scoring.BM25F())
+
+query_parser = QueryParser("content", schema=index.schema)
+
+query = query_parser.parse("example")
+
+results = searcher.search(query)
+
+for result in results:
+    print(f"Document ID: {result['id']}, Score: {result.score}")
+
+searcher.close()
+
+
+
+
+
+----------------------------# PRACTICAL 7 - PRE PROCESSING OF A TEXT , DOCUMENT :STOP WORD REMOVAL -------------------
+
+
+-->pip install nltk
+
+---------IN PYTHON CONSOLE --
+
+-->import nltk
+-->nltk.download('stopwords')
+-->nltk.download('punkt')
+
+
+
+-->Q1 STEP 1
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+print(stopwords.words('english'))
+
+eg='This is a sample program'
+word=word_tokenize(eg)
+stop_words=set(stopwords.words('english'))
+filt = [w for w in word if not w.lower in stop_words]
+
+filt=[]
+for w in word:
+    if w not in stop_words:
+        filt.append(w)
+print(word)
+print(filt)
+
+
+
+--->Q2 STEP 2
+
+
+import io
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+
+stop = set(stopwords.words('english'))
+file1=open("Text.txt")
+line=file1.read()
+words=line.split()
+
+for r in words:
+    if not r in stop:
+        appendFile=open('filteredtext.txt','a')
+        appendFile.write(""+r)
+        appendFile.close()
+
+
+
+--------------------------------# PRACTIAL 8 -- TWITTER #-------------------
+
+
+import re
+import tweepy
+from tweepy import OAuthHandler
+from textblob import TextBlob
+
+class TwitterClient(object):
+	def __init__(self):
+		consumer_key = 'XXXXXXXXXXXXXXXXXXXXXXXX'
+		consumer_secret = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+		access_token = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+		access_token_secret = 'XXXXXXXXXXXXXXXXXXXXXXXXX'
+		try:
+			self.auth = OAuthHandler(consumer_key, consumer_secret)
+			self.auth.set_access_token(access_token, access_token_secret)
+			self.api = tweepy.API(self.auth)
+		except:
+			print("Error: Authentication Failed")
+
+	def clean_tweet(self, tweet):
+		return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) |(\w+:\/\/\S+)", " ", tweet).split())
+
+	def get_tweet_sentiment(self, tweet):
+		analysis = TextBlob(self.clean_tweet(tweet))
+		if analysis.sentiment.polarity > 0:
+			return 'positive'
+		elif analysis.sentiment.polarity == 0:
+			return 'neutral'
+		else:
+			return 'negative'
+
+	def get_tweets(self, query, count = 10):
+		tweets = []
+		try:
+			fetched_tweets = self.api.search(q = query, count = count)
+			for tweet in fetched_tweets:
+				parsed_tweet = {}
+				parsed_tweet['text'] = tweet.text
+				parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text)
+
+				if tweet.retweet_count > 0:
+					if parsed_tweet not in tweets:
+						tweets.append(parsed_tweet)
+				else:
+					tweets.append(parsed_tweet)
+			return tweets
+
+		except tweepy.TweepError as e:
+			print("Error : " + str(e))
+
+def main():
+	api = TwitterClient()
+	tweets = api.get_tweets(query = 'Donald Trump', count = 200)
+	ptweets = [tweet for tweet in tweets if tweet['sentiment'] == 'positive']
+	print("Positive tweets percentage: {} %".format(100*len(ptweets)/len(tweets)))
+	ntweets = [tweet for tweet in tweets if tweet['sentiment'] == 'negative']
+	print("Negative tweets percentage: {} %".format(100*len(ntweets)/len(tweets)))
+	print("Neutral tweets percentage: {} % \ ".format(100*(len(tweets) -(len( ntweets )+len( ptweets)))/len(tweets)))
+
+	print("\n\nPositive tweets:")
+	for tweet in ptweets[:10]:
+		print(tweet['text'])
+	
+	print("\n\nNegative tweets:")
+	for tweet in ntweets[:10]:
+		print(tweet['text'])
+
+if __name__ == "__main__":
+	main()
+
+
+
+
+
+
+
+
+
+-----------------------------# PRACTICAL 9 - SIMPLE WEB CRAWLER # ------------------------
+
+import requests
+from parsel import Selector
+import time
+
+start = time.time()
+response = requests.get('https://en.wikipedia.org/wiki/Janet Jackson')
+selector=Selector(response.text)
+href_links=selector.xpath("//a/@href").getall()
+image_links = selector.xpath('//img/@src').getall()
+print('------href_links--------')
+print(href_links)
+print('-------------/href_links.---------------')
+print('--------images_links-------')
+print(image_links)
+print('-------/images_links----------')
+end=time.time()
+print("Time taken in seconds: ",(end-start))
+
+
+
+-------------------------------# PRACTICAL 10 - PARSE XML TEST AND SAVE IT TO CSV #--------------------------------
+
+
+import csv
+import xmltodict
+
+with open("sample.xml", 'r') as file:
+    filedata = file.read()
+
+data_dict = xmltodict.parse(filedata)
+employee_data_list = [dict(x) for x in data_dict["employees"]["employee"]]
+HEADERS = ['name', 'role' ,'age']
+rows = []
+
+for employee in employee_data_list:
+    name = employee["name"]
+    role= employee["role"]
+    age = employee["age"]
+    rows.append([name,role,age])
+
+with open('employee_data.csv', 'w',newline="") as f:
+    write = csv.writer(f)
+    write.writerow(HEADERS)
+    write.writerows(rows)
+
+
+
+
+---> sample.xml
+
+<employees>
+   <employee>
+      <name>Carolina</name>
+        <role>Data Engineer</role>
+        <age>24</age>
+    </employee>
+    <employee>
+      <name>Roosaka</name>
+        <role>Data Scientist</role>
+        <age>27</age>
+    </employee>
+    <employee>
+      <name>Kumar</name>
+        <role>Machine Learning Engineer</role>
+        <age>31</age>
+    </employee>
+    <employee>
+      <name>Vijay</name>
+        <role>Devops Engineer</role>
+        <age>26</age>
+    </employee>
+</employees>
+
+
+
+
+
+
+
+
+
+
