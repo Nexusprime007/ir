@@ -225,6 +225,13 @@ print(reduced_data)
 #------------------------------------------------prac7 pre-processing of text---------------------------------------------
  pip install nltk
 @------------------stop word file input--------------------------------
+create file text.txt and paste the following think
+
+the majestic mounatains provide a breadthtaking view.
+the quick brown fox jumps over the lazy dog.
+john is a person who takes care of the people around him.
+
+
 import io
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
